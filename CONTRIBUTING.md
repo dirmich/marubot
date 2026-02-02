@@ -55,3 +55,20 @@ We are currently prioritizing:
 - **Performance**: Optimizing token usage and compaction logic.
 
 Check the [GitHub Issues](https://github.com/openclaw/openclaw/issues) for "good first issue" labels!
+
+## 개발 규칙 (Developer Rules)
+
+이 프로젝트(Marubot Fork)에서 기여할 때는 다음 규칙을 **반드시** 준수해야 합니다.
+
+### 1. 언어 (Language)
+- 모든 문서(Commit Message, PR Description, Docs)와 대화는 **한국어(Korean)**를 사용합니다.
+- Git Commit Message 예시: `feat: 카카오톡 플러그인 초기 구현`
+- `chcp 65001`을 사용하여 한글이 깨지지 않도록 주의합니다.
+
+### 2. 명령 실행 (Command Execution)
+- Windows 환경에서는 `run_command`를 직접 실행하기보다, 열려있는 쉘 세션에 `send_command`를 사용하는 것을 선호합니다.
+- Git Commit 시에는 `-m` 옵션 대신 파일(`-F COMMIT_MSG`)을 사용하여 인코딩 문제를 방지합니다.
+
+### 3. 작업 절차 (Workflow)
+- 작업(Task)이 완료될 때마다 관련 문서를 먼저 업데이트합니다.
+- 문서 업데이트 후 반드시 `git commit` 및 `git push`를 수행하여 리모트와 동기화합니다.
