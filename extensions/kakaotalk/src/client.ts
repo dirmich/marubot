@@ -1,4 +1,4 @@
-import { TalkClient } from "node-kakao";
+import { TalkClient, AuthApiClient } from "node-kakao";
 
 const clients = new Map<string, TalkClient>();
 
@@ -13,24 +13,31 @@ export async function startClient(accountId: string, config: any, logger: any) {
         throw new Error("Missing credentials");
     }
 
-    const client = new TalkClient();
-
     try {
-        const loginRes = await client.login({
+        const authClient = await AuthApiClient.create(
+            "OpenClaw",
+            deviceId
+        );
+
+        const loginRes = await authClient.login({
             email,
             password,
-            deviceUUID: deviceId,
-            forced: true,
-        });
+        }, true);
 
         if (!loginRes.success) {
             throw new Error(`Login failed: ${loginRes.status}`);
         }
 
+        const client = new TalkClient();
+
+        // Use the credential from login result
+        const connRes = await client.login(loginRes.result);
+        if (!connRes.success) {
+            throw new Error(`Connection failed: ${connRes.status}`);
+        }
+
         logger?.info(`[KakaoTalk] Logged in successfully`);
         clients.set(accountId, client);
-
-        // Set up listeners here or in the caller
 
         return client;
     } catch (err) {

@@ -1,10 +1,13 @@
-import type { ChannelPlugin, ResolvedAccount } from "openclaw/plugin-sdk";
+import type { ChannelPlugin, ResolvedAccount, OpenClawConfig } from "openclaw/plugin-sdk";
 import { getKakaoRuntime } from "./runtime.js";
+import { startClient, stopClient, getClient } from "./client.js";
+import { Long } from "node-kakao";
 
 export interface KakaoAccountConfig {
     email?: string;
     password?: string;
     deviceId?: string;
+    [key: string]: unknown;
 }
 
 export interface ResolvedKakaoAccount extends ResolvedAccount<KakaoAccountConfig> {
@@ -22,18 +25,18 @@ export const kakaoPlugin: ChannelPlugin<ResolvedKakaoAccount> = {
     },
     config: {
         listAccountIds: () => ["default"],
-        resolveAccount: (cfg, accountId) => ({
+        resolveAccount: (cfg: OpenClawConfig, accountId: string) => ({
             accountId,
             name: "KakaoTalk",
             enabled: true,
-            config: cfg.channels?.kakaotalk ?? {},
+            config: (cfg.channels?.kakaotalk as KakaoAccountConfig) ?? {},
             tokenSource: "config"
         }),
         defaultAccountId: () => "default",
         setAccountEnabled: () => { },
         deleteAccount: () => { },
-        isConfigured: (account) => Boolean(account.config.email && account.config.password),
-        describeAccount: (account) => ({
+        isConfigured: (account: ResolvedKakaoAccount) => Boolean(account.config.email && account.config.password),
+        describeAccount: (account: ResolvedKakaoAccount) => ({
             accountId: account.accountId,
             name: account.name,
             enabled: account.enabled,
@@ -68,7 +71,7 @@ export const kakaoPlugin: ChannelPlugin<ResolvedKakaoAccount> = {
     },
     outbound: {
         deliveryMode: "direct",
-        sendText: async ({ to, text, accountId }) => {
+        sendText: async ({ to, text, accountId }: { to: string; text: string; accountId?: string }) => {
             const client = getClient(accountId ?? "default");
             if (!client) {
                 return { channel: "kakaotalk", success: false, error: "Client not found" };
@@ -78,12 +81,14 @@ export const kakaoPlugin: ChannelPlugin<ResolvedKakaoAccount> = {
                 // node-kakao uses Channel to send. We need to find the channel by ID (to)
                 // 'to' is usually the chat room ID.
                 // In node-kakao, we use client.channelManager.get(to)
-                const channel = client.channelList.get(to); // or similar, need to verify API
+                const channelId = Long.fromString(to);
+                const channel = client.channelList.get(channelId); // or similar, need to verify API
+                // node-kakao v4: channelList.get returns Channel | undefined
                 if (!channel) {
                     return { channel: "kakaotalk", success: false, error: "Channel not found" };
                 }
 
-                await channel.sendText(text);
+                await channel.sendChat(text);
                 return { channel: "kakaotalk", success: true };
             } catch (e: any) {
                 return { channel: "kakaotalk", success: false, error: String(e) };
@@ -100,14 +105,14 @@ export const kakaoPlugin: ChannelPlugin<ResolvedKakaoAccount> = {
         listGroups: async () => [],
     },
     messaging: {
-        normalizeTarget: (t) => t,
+        normalizeTarget: (t: string) => t,
         targetResolver: {
-            looksLikeId: (id) => /^[0-9]+$/.test(id),
+            looksLikeId: (id: string) => /^[0-9]+$/.test(id),
             hint: "KakaoTalk Chat ID"
         }
     },
     setup: {
-        resolveAccountId: ({ accountId }) => accountId,
+        resolveAccountId: ({ accountId }: { accountId: string }) => accountId,
         applyAccountName: () => ({} as any),
         validateInput: () => null,
         applyAccountConfig: () => ({} as any)
