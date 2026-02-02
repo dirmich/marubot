@@ -15,7 +15,7 @@ graph TD
         Telegram[Telegram]
         Discord[Discord]
         Slack[Slack]
-        KakaoTalk["KakaoTalk (Proposed)"]
+        KakaoTalk[KakaoTalk]
         Others["Signal, iMessage, etc."]
     end
     

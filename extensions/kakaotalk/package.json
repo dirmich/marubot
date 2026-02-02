@@ -1,0 +1,17 @@
+{
+  "name": "@openclaw/kakaotalk",
+  "version": "1.0.0",
+  "description": "OpenClaw KakaoTalk channel plugin",
+  "type": "module",
+  "devDependencies": {
+    "openclaw": "workspace:*"
+  },
+  "dependencies": {
+    "node-kakao": "^4.2.3"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

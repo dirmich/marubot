@@ -1,0 +1,13 @@
+{
+  "id": "kakaotalk",
+  "channels": ["kakaotalk"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "email": { "type": "string" },
+      "password": { "type": "string" },
+      "deviceId": { "type": "string" }
+    }
+  }
+}
